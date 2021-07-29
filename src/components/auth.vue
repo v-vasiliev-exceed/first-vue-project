@@ -1,11 +1,11 @@
 <template>
-  <div class="">
+  <div v-if="!logged" class="">
     <div class="log form-user-date">
       <p class="popup-title">Authorization form</p>
 
       <form>
         <v-text-field
-          v-model="inputedName"
+          v-model="name"
           :error-messages="nameErrors"
           :counter="10"
           label="Name"
@@ -84,38 +84,8 @@
     </div>
   </div>
 </template>
-<style scoped>
-.linkChangePopup {
-  cursor: pointer;
-  color: blue;
-}
-.form-user-date {
-  position: fixed;
-  left: 40%;
-  top: 30%;
-  background-color: #fff;
-  min-width: 300px;
-  min-height: 250px;
-  text-align: center;
-  padding: 20px;
-  padding-top: 50px;
-  font-family: sans-serif;
-}
-.log {
-  display: none;
-}
-.popup-title {
-  font-family: sans-serif;
-  font-size: 16px;
-}
-.btn-submit {
-  margin-right: 20px;
-}
-</style>
-
 <script>
 import { validationMixin } from "vuelidate";
-import { mapActions, mapGetters} from 'vuex'
 import { required, maxLength, email } from "vuelidate/lib/validators";
 
 export default {
@@ -131,40 +101,22 @@ export default {
       },
     },
   },
-
-  data() {
-   return {
+  data: () => ({
     name: "",
     email: "",
     userID: "",
     select: null,
     checkbox: false,
     haveAccount: 1,
-  } 
-  },
+  }),
 
   computed: {
-    ...mapGetters(['myForm','newForm']),
-    inputedName: {
-      get() {
-        return this.name;
-      },
-      set(value) {
-        this.name = value;
-      }
+    logged() {
+      return this.$store.state.activeUser
     },
-    // name: {
-    //   get() {
-    //     console.log(this.myForm);
-    //     return this.myForm.name
-    //   },
-    //   set(value) {
-    //     console.log("before", this.name);
-    //     console.log(this.newForm);
-    //     this.nameUpdate(value)
-    //     console.log("after", this.name);
-    //   }
-    // },
+    users() {
+      return this.$store.state.users
+    },
     checkboxErrors() {
       const errors = [];
       if (!this.$v.checkbox.$dirty) return errors;
@@ -193,9 +145,8 @@ export default {
       return errors;
     },
   },
-  methods: {
-    ...mapActions({nameUpdate: 'NAME_UPDATE'}),
 
+  methods: {
     submit() {
       this.$v.$touch();
     },
@@ -207,28 +158,40 @@ export default {
       if (localStorage.getItem(this.name) !== null) {
         alert("User with the same name already exists!");
       } else {
-        const userData = {
+        this.$store.state.users = [...this.$store.state.users,
+        {
           name: this.name,
           Password: this.email,
-          userID: userID,
-        };
-        localStorage.setItem(this.name, JSON.stringify(userData));
-        document.querySelector(".reg").style.display = "none";
-        document.querySelector(".newLocation").style.display = "block";
-        console.log(this.name);
-
-        console.log("before", this.name);
-        this.nameUpdate("John")
-        console.log("AFTER", this.name);
+          userID: this.userID
+        }]
+      this.$store.state.activeUser = this.userID
+      console.log(this.users);
+      
+        // const userData = {
+        //   name: this.name,
+        //   Password: this.email,
+        //   userID: userID,
+        // };
+        // localStorage.setItem(this.name, JSON.stringify(userData));
+        // document.querySelector(".reg").style.display = "none";
+        // document.querySelector(".newLocation").style.display = "block";
+        // this.$store.state.userName = this.name;
       }
     },
     login() {
       const userName = this.name,
         userPW = this.email;
+      let aaa = this.users.find(user => user.name === this.name && user.Password === this.email)
+      if (aaa) {
+        this.$store.state.activeUser = aaa.userID
+        console.log(this.logged);
+        }
+      console.log('user', aaa);
       if (localStorage.getItem(userName) !== null) {
         if (JSON.parse(localStorage.getItem(userName)).Password === userPW) {
           document.querySelector(".log").style.display = "none";
           document.querySelector(".newLocation").style.display = "block";
+          this.$store.state.userName = this.name;
         } else {
           alert("Password is wrong!");
         }
@@ -258,3 +221,33 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.linkChangePopup {
+  cursor: pointer;
+  color: blue;
+}
+.form-user-date {
+  position: fixed;
+  left: 40%;
+  top: 30%;
+  background-color: #fff;
+  min-width: 300px;
+  min-height: 250px;
+  text-align: center;
+  padding: 20px;
+  padding-top: 50px;
+  font-family: sans-serif;
+}
+.log {
+  display: none;
+}
+.popup-title {
+  font-family: sans-serif;
+  font-size: 16px;
+}
+.btn-submit {
+  margin-right: 20px;
+}
+</style>
+

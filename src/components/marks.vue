@@ -1,18 +1,21 @@
 <template>
-  <div>
-    <span v-on:click="open()" class="newLocation">
+  <div v-if="logged">
+    <span  v-on:click="open()" class="newLocation">
       +
     </span>
 
     <div class="popupAddingLocatin">
       <span v-on:click="close()" class="newLocation popupAddingLocatin-close"> &#215;</span>
-      <input v-model="position" class="inputlocation" type="text" placeholder="Input position" />
-      <input v-model="nameLocation" class="inputlocation" type="text" placeholder="Input name" />
+      <p>Input position</p>
+      <input v-model="position" class="inputlocation" type="text" placeholder="[10][10]" />
+      <p>Input name</p>
+      <input v-model="nameLocation" class="inputlocation" type="text" placeholder='Ship Avrora' />
+      <p>Input discription</p>
       <input
         v-model="discription"
         class="inputlocation"
         type="text"
-        placeholder="Input discription"
+        placeholder="Popular ship in Russia"
       /><br />
       <button v-on:click="addNewMark" class="btn">Add new mark</button>
     </div>
@@ -20,8 +23,12 @@
 </template>
 
 <script>
-  // import {mapActions, mapGetters} from 'vuex'
   export default {
+    computed:{
+    logged() {
+      return this.$store.state.activeUser
+    }
+  },
   data() {
     return {
       position: '',
@@ -29,13 +36,7 @@
       discription: ''
     };
   },
-  // computed :{
-  //   ...mapGetters({name: 'getName',})
-
-  // },
   methods: {
-    // ...mapActions({nameUpdate: 'NAME_UPDATE'}),
-
     open(){
       document.querySelector('.popupAddingLocatin').style.display="block";
       document.querySelector('.newLocation').style.display="none";
@@ -45,16 +46,42 @@
       document.querySelector('.newLocation').style.display="block";
     },
     addNewMark(){
-      
+      const userData = JSON.parse(localStorage.getItem(this.$store.state.userName));
+
+      const metkaData = {
+          uID: userData.userID,
+          position: this.position,
+          nameLocation: this.nameLocation,
+          discription: this.discription,
+        };
+        console.log(metkaData);
+      const userID = userData.userID;
+        const oldMarker = JSON.parse(localStorage.getItem('userID: ' + userID));  
+        if (oldMarker){
+          localStorage.setItem('userID: ' + userID,  JSON.stringify(oldMarker + ',' + this.nameLocation));  
+        }
+        else{
+          localStorage.setItem('userID: ' + userID,JSON.stringify(this.nameLocation));
+        }
+        localStorage.setItem('nameLocation:' + this.nameLocation , JSON.stringify(metkaData));
+        console.log(JSON.parse(localStorage.getItem('userID: ' + userID,)).split(','));
+        console.log(metkaData);
+        //localStorage.setItem('userID: ' + userData.userID, JSON.stringify(metkaData));
+
+        this.position = '';
+        this.nameLocation = '';
+        this.discription = '';
     }
   
+  },
+  mounted() {
+    console.log(this.logged);
   }
 };
 </script>
 
 <style scoped>
 .newLocation {
-  display: none;
   position: fixed;
   top: 20px;
   right: 20px;
