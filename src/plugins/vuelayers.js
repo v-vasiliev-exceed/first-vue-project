@@ -1,6 +1,6 @@
-import Vue from 'vue'
-import VueLayers from 'vuelayers'
-import 'vuelayers/lib/style.css' // needs css-loader
+import Vue from 'vue';
+import VueLayers from 'vuelayers';
+// import 'vuelayers/lib/style.css'; // needs css-loader
 
-Vue.use(VueLayers)
-Vue.use(Overlay)
+Vue.use(VueLayers);
+// Vue.use(Overlay);
