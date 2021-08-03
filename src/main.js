@@ -13,7 +13,7 @@ Vue.use(VueLayers)
 
 const store = new Vuex.Store({
   state: {
-    currentUser: null,
+    currentUser: localStorage.getItem('curentUser')? JSON.parse(localStorage.getItem('curentUser')): null,
     currentTag: null,
     userName: '',
     newLocation: null,
@@ -27,9 +27,7 @@ const store = new Vuex.Store({
 
 
 
-window.onload = function() {
-  localStorage.removeItem('curentUser')
-}
+
 
 new Vue({
   store: store,

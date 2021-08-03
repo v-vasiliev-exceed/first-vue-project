@@ -1,26 +1,40 @@
 <template>
   <div>
-    <span
+    <v-btn
       v-if="this.$store.state.newLocation"
       v-on:click="open()"
       class="newLocation"
+      color="secondary"
+      fab
+      ><v-icon dark>
+        mdi-plus
+      </v-icon></v-btn
     >
-      +
-    </span>
 
     <div v-if="this.$store.state.popupAddingLocatin" class="popupAddingLocatin">
       <template>
         <form @submit.prevent="submit">
-          <span
+          <v-btn
             v-on:click="close()"
             class="newLocation popupAddingLocatin-close"
+            x-small
+            color="secondary"
+            fab
+            ><v-icon dark>
+              mdi-close
+            </v-icon></v-btn
           >
-            &#215;</span
+
+          <v-alert color="blue" text 
+            ><div>Please enter correct data.</div>
+            <div>The first number must be between -180 and 180.</div>
+            <div>The second number must be between -85 and 85.</div></v-alert
           >
 
           <v-text-field
             v-model="positionFirst"
             class="inputlocation inputPosition"
+            oninput="javascript: if ((this.value > 180) || (this.value < -180)) this.value = '';"
             type="number"
             placeholder="54"
             label="Position first"
@@ -30,6 +44,7 @@
           <v-text-field
             v-model="positionSecond"
             class="inputlocation inputPosition"
+            oninput="javascript: if ((this.value > 85) || (this.value < -85)) this.value = ''; "
             type="number"
             placeholder="54"
             label="Position second"
@@ -54,16 +69,32 @@
             required
           ></v-text-field>
 
-          <v-btn class="mr-4 btn" v-on:click="addNewMark">
+          <v-btn class="mr-4 btn" v-on:click="snackbar = true">
             {{ this.$store.state.titleBtn }}
           </v-btn>
         </form>
       </template>
     </div>
+
+    <v-snackbar v-model="snackbar" centered timeout="-1"> <!-- :multi-line="multiLine"  -->
+      Do you really want {{ this.$store.state.titleBtn }}?
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="red" text v-bind="attrs" @click="snackbar = false">
+          No
+        </v-btn>
+
+        <v-btn color="red" text v-bind="attrs" @click="addNewMark">
+          Yes
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
 <script>
+import { v4 as uuid_v4 } from "uuid";
+
 export default {
   data() {
     return {
@@ -73,6 +104,7 @@ export default {
       positionSecond: "",
       newLocation: this.$store.state.newLocation,
       AddLocation: this.$store.state.popupAddingLocatin,
+      snackbar: false,
     };
   },
   methods: {
@@ -129,8 +161,7 @@ export default {
         });
         localStorage.setItem("users", JSON.stringify(users));
       } else {
-        const { uuid } = require("uuidv4");
-        const markerID = uuid();
+        const markerID = uuid_v4();
         const a = Number(this.positionFirst),
           b = Number(this.positionSecond);
 
@@ -161,6 +192,7 @@ export default {
       this.nameLocation = "";
       this.discription = "";
       this.$store.state.currentTag = null;
+      this.snackbar = false;
     },
   },
   computed: {

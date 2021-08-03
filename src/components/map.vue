@@ -16,12 +16,11 @@
             <vl-overlay :position="mark">
               <template>
                 <div class="overlay-content">
-                  <!-- -->
                   <img
                     v-on:click="openDelChange(idx)"
                     class="position-tag"
                     src="../media/marker.png"
-                    alt=""
+                    alt="marker"
                   />
                 </div>
               </template>
@@ -36,118 +35,6 @@
         <vl-source-osm></vl-source-osm>
       </vl-layer-tile>
     </vl-map>
-
-    <!-- <div class="del-change" v-if="DelChange">
-
-
-      <template>
-        <div class="text-center">
-          <v-sheet
-            class="px-7 pt-7 pb-4 mx-auto text-center d-inline-block"
-            color="blue-grey darken-3"
-            dark
-          >
-            <div class="grey--text text--lighten-1 text-body-2 mb-4">
-              <span v-on:click="close()" class="btn-close"> &#215;</span>
-              <div>
-                Name loaction: {{ this.$store.state.currentTag.nameLocation }}
-              </div>
-              <div>
-                Discription: {{ this.$store.state.currentTag.discription }}
-              </div>
-              <div>Position: {{ this.$store.state.currentTag.position }}</div>
-              <div
-                class="linkToVideo-div"
-                v-if="this.$store.state.currentTag.link !== '-'"
-                v-on:click="watchVideo = true"
-              >
-                Video:
-                <span class="linkToVideo">{{
-                  this.$store.state.currentTag.link
-                }}</span>
-              </div>
-            </div>
-
-            <v-btn
-              v-if="this.$store.state.currentTag.link === '-'"
-              class="ma-1 btn-chageTag"
-              color="grey"
-              plain
-              v-on:click="attachVideo = true"
-            >
-              Attach a video
-            </v-btn>
-
-            <v-btn
-              v-on:click="changeMarks()"
-              class="ma-1 btn-chageTag"
-              color="grey"
-              plain
-            >
-              Change
-            </v-btn>
-
-            <v-btn
-              class="ma-1 btn-chageTag"
-              color="error"
-              plain
-              v-on:click="delMark()"
-            >
-              Delete
-            </v-btn>
-          </v-sheet>
-        </div>
-        <div class="popup-video" v-if="watchVideo">
-          <span v-on:click="watchVideo = false" class="btn-close-video">
-            &#215;</span
-          >
-          <video
-            class="video"
-            controls
-            v-bind:src="this.$store.state.currentTag.link"
-          ></video>
-
-        </div>
-        <div class="inputLink" v-if="attachVideo">
-          <span>Input Link</span>
-          <input v-model="link" type="text" />
-          <button v-on:click="addLink">Add link</button>
-        </div>
-      </template>
-    </div> -->
-
-    <!-- <div class="AreYourSure" v-if="Sure">
-      <template>
-        <div class="text-center">
-          <v-sheet
-            class="px-7 pt-7 pb-4 mx-auto text-center d-inline-block"
-            color="blue-grey darken-3"
-            dark
-          >
-            <div class="grey--text text--lighten-1 text-body-2 mb-4">
-              Are your sure ?
-            </div>
-
-            <v-btn
-              v-on:click="Sure = false"
-              class="ma-1 btn-delTag"
-              color="grey"
-            >
-              Cancel
-            </v-btn>
-
-            <v-btn
-              class="ma-1 btn-delTag"
-              color="error"
-              v-on:click="delMarkNow()"
-            >
-              Delete
-            </v-btn>
-          </v-sheet>
-        </div>
-      </template>
-    </div> -->
-
     <template v-if="this.$store.state.currentTag">
       <v-dialog v-model="dialog" width="500"
         ><v-card>
@@ -233,32 +120,23 @@
 
     <template>
       <div class="text-center">
-        <v-dialog v-model="dialogDel" width="300">
-          <v-card>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="primary" text @click="dialogDel = false">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </v-card-actions>
+       <v-snackbar v-model="dialogDel"  centered timeout="-1">  <!-- :multi-line="multiLine" -->
+          Are your sure ?
 
-            <v-card-title class="text-h5 grey lighten-2 flex-center-selector">
-              Are your sure ?
-            </v-card-title>
-            <v-card-actions class="flex-center-selector">
-              <v-btn
-                color="secondary"
-                elevation="2"
-                v-on:click="dialogDel = false"
-                >Cancel</v-btn
-              >
+          <template>
+            <v-btn
+              class="sure-btn"
+              color="secondary"
+              elevation="2"
+              v-on:click="dialogDel = false"
+              >Cancel</v-btn
+            >
 
-              <v-btn color="error" elevation="5" v-on:click="delMarkNow()"
-                >Delete</v-btn
-              >
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+            <v-btn class="sure-btn" color="error" elevation="5" v-on:click="delMarkNow()"
+              >Delete</v-btn
+            >
+          </template>
+        </v-snackbar>
       </div>
     </template>
   </div>
@@ -275,8 +153,6 @@ export default {
       position: null,
       DelChange: null,
       idx: null,
-      Sure: null,
-      watchVideo: null,
       attachVideo: null,
       link: null,
       dialog: false,
@@ -295,7 +171,6 @@ export default {
       this.$store.state.popupAddingLocatin = false;
       this.$store.state.newLocation = true;
       this.dialog = true;
-      //this.DelChange = true;
       this.idx = idx;
       this.$store.state.currentTag = this.$store.state.currentUser.marks[
         this.idx
@@ -346,6 +221,7 @@ export default {
       });
       localStorage.setItem("users", JSON.stringify(userData));
     },
+    
   },
   computed: {
     userMarks() {
@@ -473,7 +349,11 @@ export default {
   margin-right: 10px;
   color: rgb(139, 139, 139);
 }
-.flex-center-selector{
+.flex-center-selector {
   justify-content: center;
 }
+.sure-btn{
+  margin-left: 10px;
+}
+
 </style>

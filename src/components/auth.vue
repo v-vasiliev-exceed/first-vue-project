@@ -1,70 +1,83 @@
 <template>
-  <div id="popup_auth">
-    <div v-if="log" class="log form-user-date">
-      <p class="popup-title">Authorization form</p>
+  <div>
+    <div id="popup_auth" v-if="!this.$store.state.currentUser">
+      <div v-if="log" class="log form-user-date">
+        <p class="popup-title">Authorization form</p>
 
-      <form>
-        <v-text-field
-          v-model="name"
-          :error-messages="nameErrors"
-          :counter="10"
-          label="Name"
-          required
-          @input="$v.name.$touch()"
-          @blur="$v.name.$touch()"
-        ></v-text-field>
-        <div class="notificationPasswordIsWrong" v-if="PassworIsWrong">Password is wrong</div>
-        <v-text-field
-          type="password"
-          v-model="password"
-          label="Password"
-          required
-          @input="$v.email.$touch()"
-          @blur="$v.email.$touch()"
-        ></v-text-field>
-        <a class="linkChangePopup" v-on:click="goToRegistration()"
-          >Registration form</a
-        >
-        <v-btn class="mr-4 btn-submit" @click="login">
-          submit
-        </v-btn>
-        <v-btn @click="clear">
-          clear
-        </v-btn>
-      </form>
+        <form>
+          <v-text-field
+            v-model="name"
+            :error-messages="nameErrors"
+            :counter="10"
+            label="Name"
+            required
+            @input="$v.name.$touch()"
+            @blur="$v.name.$touch()"
+          ></v-text-field>
+          <div class="notificationPasswordIsWrong" v-if="PassworIsWrong">
+            Password is wrong
+          </div>
+          <v-text-field
+            type="password"
+            v-model="password"
+            label="Password"
+            required
+            @input="$v.email.$touch()"
+            @blur="$v.email.$touch()"
+          ></v-text-field>
+          <a class="linkChangePopup" v-on:click="goToRegistration()"
+            >Registration form</a
+          >
+          <v-btn class="mr-4 btn-submit" @click="login">
+            submit
+          </v-btn>
+          <v-btn @click="clear">
+            clear
+          </v-btn>
+        </form>
+      </div>
+      <div v-if="reg" class="reg form-user-date">
+        <p class="popup-title">Registration form</p>
+        <form>
+          <v-text-field
+            class="form-input"
+            v-model="name"
+            :error-messages="nameErrors"
+            :counter="10"
+            label="Name"
+            required
+            @input="$v.name.$touch()"
+            @blur="$v.name.$touch()"
+          ></v-text-field>
+          <v-text-field
+            type="password"
+            v-model="password"
+            label="Password"
+            required
+            @input="$v.email.$touch()"
+            @blur="$v.email.$touch()"
+          ></v-text-field>
+          <a class="linkChangePopup" v-on:click="goToAuthorization()"
+            >Authorization form</a
+          >
+          <v-btn class="mr-4 btn-submit" @click="registrtion()">
+            submit
+          </v-btn>
+          <v-btn @click="clear">
+            clear
+          </v-btn>
+        </form>
+      </div>
     </div>
-    <div v-if="reg" class="reg form-user-date">
-      <p class="popup-title">Registration form</p>
-      <form>
-        <v-text-field
-          class="form-input"
-          v-model="name"
-          :error-messages="nameErrors"
-          :counter="10"
-          label="Name"
-          required
-          @input="$v.name.$touch()"
-          @blur="$v.name.$touch()"
-        ></v-text-field>
-        <v-text-field
-          type="password"
-          v-model="password"
-          label="Password"
-          required
-          @input="$v.email.$touch()"
-          @blur="$v.email.$touch()"
-        ></v-text-field>
-        <a class="linkChangePopup" v-on:click="goToAuthorization()"
-          >Authorization form</a
-        >
-        <v-btn class="mr-4 btn-submit" @click="registrtion()">
-          submit
-        </v-btn>
-        <v-btn @click="clear">
-          clear
-        </v-btn>
-      </form>
-    </div>
+
+    <v-btn
+      color="secondary"
+      elevation="10"
+      rounded
+      class="logOut"
+      v-if="this.$store.state.currentUser"
+      v-on:click="logOut()"
+      >Log out</v-btn>
   </div>
 </template>
 
@@ -97,7 +110,7 @@ export default {
     log: true,
     newLocation: null,
     addNL: null,
-    PassworIsWrong: null
+    PassworIsWrong: null,
   }),
 
   computed: {
@@ -116,7 +129,7 @@ export default {
       this.$v.$touch();
     },
     registrtion() {
-      if (this.name !=='' && this.password !== '') {
+      if (this.name !== "" && this.password !== "") {
         const { uuid } = require("uuidv4");
         const userID = uuid();
         this.userID = userID;
@@ -152,8 +165,8 @@ export default {
         }
         this.name = "";
         this.password = "";
-      }else{
-        alert('Input correct data')
+      } else {
+        alert("Input correct data");
       }
     },
     login() {
@@ -181,7 +194,6 @@ export default {
       } else {
         alert("user with same name not found");
       }
- 
     },
     clear() {
       this.$v.$reset();
@@ -201,6 +213,12 @@ export default {
       this.log = false;
       this.name = "";
       this.password = "";
+    },
+     logOut(){
+      this.$store.state.currentUser = null;
+      localStorage.removeItem('curentUser');
+      console.log(this.$store.state.currentUser);
+
     },
   },
 };
@@ -234,5 +252,10 @@ export default {
 }
 .btn-submit {
   margin-right: 20px;
+}
+.logOut{
+  position: fixed;
+  top: 10px;
+  left: 50px;
 }
 </style>

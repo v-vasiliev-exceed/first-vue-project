@@ -3,7 +3,7 @@
     <v-app>
       <Map/>
       <Auth/>
-      <Marks/>
+      <AddingMarker/>
     </v-app>
   </div>
 </template>
@@ -12,11 +12,11 @@
 <script>
 import Map from './components/map.vue'
 import Auth from './components/auth.vue'
-import Marks from './components/marks.vue'
+import AddingMarker from './components/AddingMarker'
 
 export default {
 	components: {
-    Map, Auth, Marks
+    Map, Auth, AddingMarker
 	}
 }
 </script>
