@@ -1,6 +1,6 @@
 <template>
-  <div v-if="!logged" class="">
-    <div class="log form-user-date">
+  <div id="popup_auth">
+    <div v-if="log" class="log form-user-date">
       <p class="popup-title">Authorization form</p>
 
       <form>
@@ -13,9 +13,10 @@
           @input="$v.name.$touch()"
           @blur="$v.name.$touch()"
         ></v-text-field>
+        <div class="notificationPasswordIsWrong" v-if="PassworIsWrong">Password is wrong</div>
         <v-text-field
           type="password"
-          v-model="email"
+          v-model="password"
           label="Password"
           required
           @input="$v.email.$touch()"
@@ -24,15 +25,6 @@
         <a class="linkChangePopup" v-on:click="goToRegistration()"
           >Registration form</a
         >
-        <v-checkbox
-          v-model="checkbox"
-          :error-messages="checkboxErrors"
-          label="Do you agree?"
-          required
-          @change="$v.checkbox.$touch()"
-          @blur="$v.checkbox.$touch()"
-        ></v-checkbox>
-
         <v-btn class="mr-4 btn-submit" @click="login">
           submit
         </v-btn>
@@ -41,7 +33,7 @@
         </v-btn>
       </form>
     </div>
-    <div class="reg form-user-date">
+    <div v-if="reg" class="reg form-user-date">
       <p class="popup-title">Registration form</p>
       <form>
         <v-text-field
@@ -56,7 +48,7 @@
         ></v-text-field>
         <v-text-field
           type="password"
-          v-model="email"
+          v-model="password"
           label="Password"
           required
           @input="$v.email.$touch()"
@@ -65,15 +57,6 @@
         <a class="linkChangePopup" v-on:click="goToAuthorization()"
           >Authorization form</a
         >
-        <v-checkbox
-          v-model="checkbox"
-          :error-messages="checkboxErrors"
-          label="Do you agree?"
-          required
-          @change="$v.checkbox.$touch()"
-          @blur="$v.checkbox.$touch()"
-        ></v-checkbox>
-
         <v-btn class="mr-4 btn-submit" @click="registrtion()">
           submit
         </v-btn>
@@ -84,6 +67,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import { validationMixin } from "vuelidate";
 import { required, maxLength, email } from "vuelidate/lib/validators";
@@ -101,47 +85,28 @@ export default {
       },
     },
   },
+
   data: () => ({
     name: "",
-    email: "",
+    password: "",
     userID: "",
     select: null,
     checkbox: false,
     haveAccount: 1,
+    reg: null,
+    log: true,
+    newLocation: null,
+    addNL: null,
+    PassworIsWrong: null
   }),
 
   computed: {
-    logged() {
-      return this.$store.state.activeUser
-    },
-    users() {
-      return this.$store.state.users
-    },
-    checkboxErrors() {
-      const errors = [];
-      if (!this.$v.checkbox.$dirty) return errors;
-      !this.$v.checkbox.checked && errors.push("You must agree to continue!");
-      return errors;
-    },
-    selectErrors() {
-      const errors = [];
-      if (!this.$v.select.$dirty) return errors;
-      !this.$v.select.required && errors.push("Item is required");
-      return errors;
-    },
     nameErrors() {
       const errors = [];
       if (!this.$v.name.$dirty) return errors;
       !this.$v.name.maxLength &&
         errors.push("Name must be at most 10 characters long");
       !this.$v.name.required && errors.push("Name is required.");
-      return errors;
-    },
-    emailErrors() {
-      const errors = [];
-      if (!this.$v.email.$dirty) return errors;
-      !this.$v.email.email && errors.push("Must be valid e-mail");
-      !this.$v.email.required && errors.push("E-mail is required");
       return errors;
     },
   },
@@ -151,72 +116,91 @@ export default {
       this.$v.$touch();
     },
     registrtion() {
-      const { uuid } = require("uuidv4");
-      const userID = uuid();
-      this.userID = userID;
-
-      if (localStorage.getItem(this.name) !== null) {
-        alert("User with the same name already exists!");
-      } else {
-        this.$store.state.users = [...this.$store.state.users,
-        {
+      if (this.name !=='' && this.password !== '') {
+        const { uuid } = require("uuidv4");
+        const userID = uuid();
+        this.userID = userID;
+        const userData = {
           name: this.name,
-          Password: this.email,
-          userID: this.userID
-        }]
-      this.$store.state.activeUser = this.userID
-      console.log(this.users);
-      
-        // const userData = {
-        //   name: this.name,
-        //   Password: this.email,
-        //   userID: userID,
-        // };
-        // localStorage.setItem(this.name, JSON.stringify(userData));
-        // document.querySelector(".reg").style.display = "none";
-        // document.querySelector(".newLocation").style.display = "block";
-        // this.$store.state.userName = this.name;
+          Password: this.password,
+          userID: userID,
+          marks: [],
+        };
+        const oldUsers = JSON.parse(localStorage.getItem("users"));
+        const allName = [];
+
+        if (oldUsers) {
+          oldUsers.forEach((element, idx) => {
+            allName[idx] = element.name;
+          });
+          if (allName.includes(userData.name)) {
+            alert("user with same name exist");
+          } else {
+            oldUsers.push(userData);
+            localStorage.setItem("users", JSON.stringify(oldUsers));
+            this.reg = false;
+            this.$store.state.newLocation = true;
+            this.$store.state.userName = this.name;
+            this.$store.state.currentUser = userData;
+            localStorage.setItem("curentUser", JSON.stringify(userData));
+          }
+        } else {
+          localStorage.setItem("users", JSON.stringify([userData]));
+          this.reg = false;
+          this.$store.state.newLocation = true;
+          localStorage.setItem("curentUser", JSON.stringify(userData));
+        }
+        this.name = "";
+        this.password = "";
+      }else{
+        alert('Input correct data')
       }
     },
     login() {
       const userName = this.name,
-        userPW = this.email;
-      let aaa = this.users.find(user => user.name === this.name && user.Password === this.email)
-      if (aaa) {
-        this.$store.state.activeUser = aaa.userID
-        console.log(this.logged);
+        userPW = this.password,
+        users = JSON.parse(localStorage.getItem("users"));
+
+      let userData = null;
+
+      users.forEach((element) => {
+        if (element.name === userName) {
+          userData = element;
         }
-      console.log('user', aaa);
-      if (localStorage.getItem(userName) !== null) {
-        if (JSON.parse(localStorage.getItem(userName)).Password === userPW) {
-          document.querySelector(".log").style.display = "none";
-          document.querySelector(".newLocation").style.display = "block";
+      });
+      if (userData) {
+        if (userData.Password === userPW) {
+          this.log = false;
+          this.$store.state.newLocation = true;
           this.$store.state.userName = this.name;
+          this.$store.state.currentUser = userData;
+          localStorage.setItem("curentUser", JSON.stringify(userData));
         } else {
-          alert("Password is wrong!");
+          alert("Password is wrong");
         }
       } else {
-        alert("No user with that name!");
+        alert("user with same name not found");
       }
+ 
     },
     clear() {
       this.$v.$reset();
       this.name = "";
-      this.email = "";
+      this.password = "";
       this.select = null;
       this.checkbox = false;
     },
     goToAuthorization() {
-      document.querySelector(".reg").style.display = "none";
-      document.querySelector(".log").style.display = "block";
+      this.reg = false;
+      this.log = true;
       this.name = "";
-      this.email = "";
+      this.password = "";
     },
     goToRegistration() {
-      document.querySelector(".reg").style.display = "block";
-      document.querySelector(".log").style.display = "none";
+      this.reg = true;
+      this.log = false;
       this.name = "";
-      this.email = "";
+      this.password = "";
     },
   },
 };
@@ -224,24 +208,26 @@ export default {
 
 <style scoped>
 .linkChangePopup {
+  display: block;
   cursor: pointer;
   color: blue;
+  margin-bottom: 30px;
 }
 .form-user-date {
   position: fixed;
-  left: 40%;
-  top: 30%;
+  left: 50%;
+  top: 50%;
+  margin-left: -100px;
+  margin-top: -140px;
   background-color: #fff;
-  min-width: 300px;
-  min-height: 250px;
+  max-height: 400px;
+  max-width: 400px;
   text-align: center;
   padding: 20px;
   padding-top: 50px;
   font-family: sans-serif;
 }
-.log {
-  display: none;
-}
+
 .popup-title {
   font-family: sans-serif;
   font-size: 16px;
@@ -250,4 +236,3 @@ export default {
   margin-right: 20px;
 }
 </style>
-

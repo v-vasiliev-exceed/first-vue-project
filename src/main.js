@@ -4,28 +4,21 @@ import Vuetify from './plugins/vuetify'
 import VueLayers from 'vuelayers'
 import Vuex from 'vuex'
 
-
-
 Vue.config.productionTip = false
 Vue.use(Vuex)
 Vue.use(VueLayers)
-Vue.use(Vuetify)
 
-const users = [
-  {Password: "1",
-  name: "1",
-  userID: "dd3b3aa2-f975-4bd4-83ac-806ceeb72441"},
 
-  {Password: "3",
-  name: "2",
-  userID: "6f343c3c-0ee9-4434-84f7-e8fa77f0f4f6"}
-]
+
 
 const store = new Vuex.Store({
   state: {
+    currentUser: null,
+    currentTag: null,
     userName: '',
-    users: [ ...users],
-    activeUser: null
+    newLocation: null,
+    popupAddingLocatin: null,
+    titleBtn: 'Add new location'
   },
   mutations: {
     
@@ -34,9 +27,14 @@ const store = new Vuex.Store({
 
 
 
+window.onload = function() {
+  localStorage.removeItem('curentUser')
+}
+
 new Vue({
   store: store,
-  render: h => h(App)
+  render: h => h(App),
+  vuetify: Vuetify
 }).$mount('#app')
 
 

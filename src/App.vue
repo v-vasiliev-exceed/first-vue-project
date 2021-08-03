@@ -1,9 +1,11 @@
 <template>
-<div>
-  <Map/>
-  <Auth/>
-  <Marks/>
-</div>
+  <div id="app">
+    <v-app>
+      <Map/>
+      <Auth/>
+      <Marks/>
+    </v-app>
+  </div>
 </template>
 
 

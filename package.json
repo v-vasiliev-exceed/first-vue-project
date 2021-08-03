@@ -13,7 +13,7 @@
     "vue": "^2.6.14",
     "vuelayers": "^0.12.0-rc.26",
     "vuelidate": "^0.7.6",
-    "vuetify": "^2.4.0",
+    "vuetify": "^2.5.8",
     "vuex": "^3.6.2"
   },
   "devDependencies": {
