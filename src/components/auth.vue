@@ -13,21 +13,31 @@
         </p>
 
         <form>
+          <v-alert
+            v-if="nameNotFound"
+            type="warning"
+          >
+            User with same name not found
+          </v-alert>
           <v-text-field
             v-model="name"
             :counter="10"
             label="Name"
             required
-            @input="$v.name.$touch()"
-            @blur="$v.name.$touch()"
+            @input="nameNotFound = false"
           />
+          <v-alert
+            v-if="passwordIsWrong"
+            type="error"
+          >
+            Password is wrong
+          </v-alert>
           <v-text-field
             v-model="password"
             type="password"
             label="Password"
             required
-            @input="$v.email.$touch()"
-            @blur="$v.email.$touch()"
+            @input="passwordIsWrong = false"
           />
           <a
             class="linkChangePopup"
@@ -52,22 +62,32 @@
           Registration form
         </p>
         <form>
+          <v-alert
+            v-if="hasName"
+            type="warning"
+          >
+            User with same name exist
+          </v-alert>
+          <v-alert
+            v-if="invalidData"
+            type="warning"
+          >
+            Please fill in all fields
+          </v-alert>
           <v-text-field
             v-model="name"
             class="form-input"
             :counter="10"
             label="Name"
             required
-            @input="$v.name.$touch()"
-            @blur="$v.name.$touch()"
+            @input="hasName = false;invalidData = false"
           />
           <v-text-field
             v-model="password"
             type="password"
             label="Password"
             required
-            @input="$v.email.$touch()"
-            @blur="$v.email.$touch()"
+            @input="invalidData = false"
           />
           <a
             class="linkChangePopup"
@@ -124,11 +144,14 @@ export default {
     reg: null,
     log: true,
     newLocation: null,
+    passwordIsWrong: false,
+    hasName: false,
+    invalidData: false,
+    nameNotFound: false,
   }),
   methods: {
     registrtion() {
       if (this.name !== '' && this.password !== '') {
-        // const { uuid } = require('uuidv4');
         const userID = uuid();
         this.userID = userID;
         const userData = {
@@ -145,7 +168,7 @@ export default {
             allName[idx] = element.name;
           });
           if (allName.includes(userData.name)) {
-            console.log('user with same name exist'); // были алерты оставил консольлоги для напоминания
+            this.hasName = true;
           } else {
             oldUsers.push(userData);
             localStorage.setItem('users', JSON.stringify(oldUsers));
@@ -164,7 +187,7 @@ export default {
         this.name = '';
         this.password = '';
       } else {
-        console.log('Input correct data'); // были алерты оставил консольлоги для напоминания
+        this.invalidData = true;
       }
     },
     login() {
@@ -187,10 +210,10 @@ export default {
           this.$store.state.currentUser = userData;
           localStorage.setItem('curentUser', JSON.stringify(userData));
         } else {
-          console.log('Password is wrong'); // были алерты оставил консольлоги для напоминания
+          this.passwordIsWrong = true;
         }
       } else {
-        console.log('user with same name not found'); // были алерты оставил консольлоги для напоминания
+        this.nameNotFound = true;
       }
     },
     clear() {
